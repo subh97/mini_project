@@ -6,6 +6,10 @@ from blog.models import Blog
 from blog.serializers import BlogSerializer,RegisterSerializer,UserSerializer
 from django.contrib.auth.models import User
 
+
+"""  Create a user registration  """
+
+
 class RegisterApi(generics.GenericAPIView):
     serializer_class = RegisterSerializer
     def post(self, request, *args,  **kwargs):
@@ -17,6 +21,8 @@ class RegisterApi(generics.GenericAPIView):
             "message": "User Created Successfully.  Now perform Login to get your token",
         })
 
+"""  give a user permission to get and create a blog """
+
 class BlogListApiView(APIView):
     # add permission to check if user is authenticated
     permission_classes = [permissions.IsAuthenticated]
@@ -24,7 +30,7 @@ class BlogListApiView(APIView):
     # 1. List all
     def get(self, request, *args, **kwargs):
         '''
-        List all the todo items for given requested user
+        List all the Blog items for given requested user
         '''
         blogs = Blog.objects.filter(user = request.user.id)
         serializer = BlogSerializer(blogs, many=True)
@@ -33,7 +39,7 @@ class BlogListApiView(APIView):
     # 2. Create
     def post(self, request, *args, **kwargs):
         '''
-        Create the Todo with given todo data
+        Create the blog with given blog data
         '''
         data = {
             'title': request.data.get('title'), 
@@ -57,7 +63,7 @@ class BlogDetailApiView(APIView):
 
     def get_object(self, blog_id, user_id):
         '''
-        Helper method to get the object with given todo_id, and user_id
+        Helper method to get the object with given blog_id, and user_id
         '''
         try:
             return Blog.objects.get(id=blog_id, user = user_id)
@@ -66,9 +72,7 @@ class BlogDetailApiView(APIView):
 
     # 3. Retrieve
     def get(self, request, blog_id, *args, **kwargs):
-        '''
-        Retrieves the Todo with given todo_id
-        '''
+       
         blog_instance = self.get_object(blog_id, request.user.id)
         if not blog_instance:
             return Response(
@@ -85,7 +89,7 @@ class BlogDetailApiView(APIView):
     # 4. Update
     def put(self, request, blog_id, *args, **kwargs):
         '''
-        Updates the todo item with given blog_id if exists
+        Updates the blog item with given blog_id if exists
         '''
         blog_instance = self.get_object(blog_id, request.user.id)
         if not blog_instance:
@@ -125,9 +129,18 @@ class BlogDetailApiView(APIView):
             status=status.HTTP_200_OK
         )
 
+"""  view all blog data  """
+
 class BlogAllDetails(APIView):
     def get(self, request, format=None):
         all_blogs = Blog.objects.all()
         serializer = BlogSerializer(all_blogs, many=True)
         return Response(serializer.data)
 
+"""  See all the users  """
+
+class UsersAllDetails(APIView):
+    def get (self,request):
+        all_user=User.objects.all()
+        serializer=UserSerializer(all_user,many=True)
+        return Response(serializer.data)
