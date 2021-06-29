@@ -1,27 +1,46 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status
+from rest_framework import  status
 from rest_framework import permissions,generics
 from blog.models import Blog
-from blog.serializers import BlogSerializer,RegisterSerializer,UserSerializer
+from django.contrib.auth import login
+from rest_framework.permissions import AllowAny
+from rest_framework_simplejwt.views import TokenObtainPairView
 from django.contrib.auth.models import User
+from blog.serializers import RegisterSerializer,UserSerializer,LoginSerializer,BlogSerializer
+from rest_framework.authtoken.serializers import AuthTokenSerializer
 
 
-"""  Create a user registration  """
 
-
-class RegisterApi(generics.GenericAPIView):
+# Register API
+class RegisterAPI(generics.GenericAPIView):
     serializer_class = RegisterSerializer
-    def post(self, request, *args,  **kwargs):
+
+    def post(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         return Response({
-            "user": UserSerializer(user,    context=self.get_serializer_context()).data,
-            "message": "User Created Successfully.  Now perform Login to get your token",
+        "user": UserSerializer(user, context=self.get_serializer_context()).data,
+        
         })
 
-"""  give a user permission to get and create a blog """
+
+class LoginAPI(TokenObtainPairView):
+    permission_classes = (permissions.AllowAny,)
+    def post(self, request, format=None):
+        serializer = AuthTokenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.validated_data['user']
+        login(request, user)
+        return super(LoginAPI, self).post(request, format=None)
+
+#class LogoutApi(APIView):
+  #  def get(self, request, format=None):
+        # simply delete the token to force a login
+      #  request.user.auth_token.delete()
+       # return Response(status=status.HTTP_200_OK)
+
 
 class BlogListApiView(APIView):
     # add permission to check if user is authenticated
@@ -126,21 +145,25 @@ class BlogDetailApiView(APIView):
         blog_instance.delete()
         return Response(
             {"res": "Object deleted!"},
-            status=status.HTTP_200_OK
-        )
+            status=status.HTTP_200_OK)
 
-"""  view all blog data  """
 
 class BlogAllDetails(APIView):
     def get(self, request, format=None):
         all_blogs = Blog.objects.all()
         serializer = BlogSerializer(all_blogs, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data) 
 
-"""  See all the users  """
+ #See all the users 
 
 class UsersAllDetails(APIView):
     def get (self,request):
         all_user=User.objects.all()
         serializer=UserSerializer(all_user,many=True)
-        return Response(serializer.data)
+        return Response(serializer.data) 
+        
+ 
+
+
+
+
