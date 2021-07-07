@@ -35,11 +35,12 @@ class LoginAPI(TokenObtainPairView):
         login(request, user)
         return super(LoginAPI, self).post(request, format=None)
 
-#class LogoutApi(APIView):
-  #  def get(self, request, format=None):
+class LogoutApiView(APIView):
+    def get(self, request, format=None):
+
         # simply delete the token to force a login
-      #  request.user.auth_token.delete()
-       # return Response(status=status.HTTP_200_OK)
+        request.user.jwt_token.delete()
+        return Response(status=status.HTTP_200_OK)
 
 
 class BlogListApiView(APIView):

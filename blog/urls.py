@@ -4,13 +4,13 @@ from blog.views import(
     LoginAPI, BlogAllDetails,UsersAllDetails
     ,BlogListApiView,BlogDetailApiView,
     RegisterAPI)
-#from blog.views import LogoutApi
+from blog.views import LogoutApiView
 from rest_framework_simplejwt import views as jwt_views
 
 urlpatterns = [
     path('api/register/', RegisterAPI.as_view(), name='register'),
     path('api/login/',LoginAPI.as_view(),name='login'),
-    #path('api/logout/',LogoutApi.as_view(),name='logout'),
+    path('api/logout/',LogoutApiView.as_view(),name='logout'),
     path('blog/', BlogListApiView.as_view()),
     path('blog/<int:blog_id>/', BlogDetailApiView.as_view()),
     path('all/blog/',BlogAllDetails.as_view()),
